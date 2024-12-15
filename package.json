@@ -7,15 +7,16 @@
     "cra-template": "1.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0",
     "react-scripts": "^3.0.1",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
-  "start": "react-scripts --openssl-legacy-provider start",
-  "build": "react-scripts --openssl-legacy-provider build",
-  "test": "react-scripts --openssl-legacy-provider test",
-  "eject": "react-scripts eject"
-},
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts --openssl-legacy-provider test",
+    "eject": "react-scripts eject"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",

@@ -1,11 +1,13 @@
 import React from 'react';
+import Login from './Login';
 import Minesweeper from './Minesweeper';
+
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Minesweeper />
+      <Login />
     </div>
   );
 }

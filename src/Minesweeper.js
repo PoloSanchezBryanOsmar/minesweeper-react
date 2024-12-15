@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PlayerManager from './PlayerManager';  // Asume que está en el mismo directorio
 import GameEndDialog from './GameEndDialog';
+import NoPlayersError from './NoPlayersError';
 // Configuraciones de dificultad
 const DIFFICULTY_LEVELS = {
   facil: { 
@@ -98,6 +99,7 @@ const Buscaminas = () => {
   
   // Iniciar temporizador
   const startTimer = () => {
+    stopTimer();
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       const currentTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
@@ -325,7 +327,13 @@ const Buscaminas = () => {
       }
     };
   }, []);
-
+  const handleResetGame = () => {
+    // Reiniciar los estados principales del juego
+    setShowGameEndDialog(false);
+    setGameStatus(null);
+    setTime(0);
+    // Cualquier otro estado que necesites resetear para comenzar de nuevo
+  };
   // Renderizar celdas
   const renderCell = (cell, row, col) => {
     let cellClass = 'cell';
@@ -443,14 +451,11 @@ const Buscaminas = () => {
             font-family: 'Arial', sans-serif;
           }
   
-          .buscaminas-container {
-          background-color: #f0f4f8;
-          border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-          max-width: 600px;
+           .buscaminas-container {
+          max-width: 800px; /* Increased max-width to accommodate larger boards */
+          width: 100%;
           margin: 0 auto;
-          font-family: 'Arial', sans-serif;
+          overflow: hidden;
         }
 
         .menu-bar {
@@ -485,13 +490,16 @@ const Buscaminas = () => {
           margin-left: 10px;
         }
 
-        .board {
+       .board {
           display: grid;
           gap: 4px;
           background-color: #e6eaf0;
           border-radius: 8px;
           padding: 8px;
           box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.05);
+          max-width: 100%;
+          width: 100%;
+          justify-content: center;
         }
 
         .cell {
@@ -503,9 +511,10 @@ const Buscaminas = () => {
           align-items: center;
           cursor: pointer;
           font-weight: bold;
-          font-size: 18px;
+          font-size: 14px; /* Reduced font size for smaller cells */
           transition: all 0.2s ease;
           border: 2px solid #8ca6c0;
+          min-width: 0; /* Allow cells to shrink */
         }
 
         .cell:hover {
@@ -575,6 +584,7 @@ const Buscaminas = () => {
       currentPlayer={currentPlayer}
       onSelectNextPlayer={handleSelectNextPlayer}
       time={time}
+      onReset={handleResetGame}  // Agrega esta línea
     />
   
       <style jsx>{`

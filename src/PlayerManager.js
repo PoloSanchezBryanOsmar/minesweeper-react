@@ -65,7 +65,6 @@ const PlayerManager = ({
     <div className="player-manager">
       <h3>Jugadores</h3>
       
-      {/* Lista de Jugadores */}
       <div className="players-list">
         {players.map((player) => (
           <div 
@@ -102,7 +101,6 @@ const PlayerManager = ({
         ))}
       </div>
 
-      {/* Resultados de los Jugadores */}
       {players.length > 0 && (
         <div className="players-results-section">
           <h4>Resultados</h4>
@@ -115,7 +113,6 @@ const PlayerManager = ({
         </div>
       )}
 
-      {/* Añadir Jugador */}
       <div className="add-player">
         <input
           type="text"
@@ -133,34 +130,45 @@ const PlayerManager = ({
       </div>
 
       <style jsx>{`
-        /* Estilos anteriores... */
-
-        .players-results-section {
-          margin-top: 16px;
-          background-color: #e6eaf0;
-          border-radius: 8px;
-          padding: 12px;
+        .player-manager {
+          margin-top: 20px;
         }
-
-        .player-results-container {
-          margin-bottom: 12px;
+        .players-list {
+          margin-bottom: 20px;
         }
-
+        .player-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        .player-name {
+          cursor: pointer;
+          font-weight: bold;
+        }
+        .current-player-badge {
+          background: #2ecc71;
+          color: white;
+          padding: 5px 10px;
+          border-radius: 5px;
+          font-size: 12px;
+        }
+        .add-player {
+          display: flex;
+          gap: 10px;
+        }
+        .player-results-section {
+          margin-top: 20px;
+        }
         .player-results {
           width: 100%;
           border-collapse: collapse;
         }
-
-        .player-results th, 
+        .player-results th,
         .player-results td {
-          border: 1px solid #b0c4de;
+          border: 1px solid #ddd;
           padding: 8px;
           text-align: center;
-        }
-
-        .player-results th {
-          background-color: #4a90e2;
-          color: white;
         }
       `}</style>
     </div>

@@ -5,7 +5,8 @@ const GameEndDialog = ({
   players, 
   currentPlayer, 
   onSelectNextPlayer, 
-  time 
+  time, 
+  onReset
 }) => {
   if (!isOpen) return null;
   return (
@@ -17,13 +18,13 @@ const GameEndDialog = ({
         
         <div className="game-result-info">
           <p>Tiempo: {time} segundos</p>
-          <p>Jugador: {currentPlayer.name}</p>
+          <p>Jugador: {currentPlayer?.name || 'Jugador Anónimo'}</p>
         </div>
         <div className="next-player-selection">
           <h3>Selecciona al siguiente jugador</h3>
           <div className="player-buttons">
             {players
-              .filter(player => player.id !== currentPlayer.id)
+              .filter(player => player.id !== currentPlayer?.id)
               .map(player => (
                 <button 
                   key={player.id} 
@@ -38,6 +39,7 @@ const GameEndDialog = ({
             )}
           </div>
         </div>
+        <button className="reset-btn" onClick={onReset}>Reiniciar Juego</button>
       </div>
       <style jsx>{`
         .game-end-overlay {
@@ -92,6 +94,19 @@ const GameEndDialog = ({
         }
         .player-select-btn:hover {
           background-color: #357abd;
+        }
+        .reset-btn {
+          margin-top: 20px;
+          background-color: #e74c3c;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        .reset-btn:hover {
+          background-color: #c0392b;
         }
       `}</style>
     </div>

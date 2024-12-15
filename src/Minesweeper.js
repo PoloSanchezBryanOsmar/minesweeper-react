@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PlayerManager from './PlayerManager';  // Asume que está en el mismo directorio
 import GameEndDialog from './GameEndDialog';
-import NoPlayersError from './NoPlayersError';
+import Login from './Login';
+
+function Minesweeper({ username }) {
+
 // Configuraciones de dificultad
 const DIFFICULTY_LEVELS = {
   facil: { 
@@ -24,7 +27,6 @@ const DIFFICULTY_LEVELS = {
   }
 };
 
-const Buscaminas = () => {
   const [difficulty, setDifficulty] = useState('facil');
   const [board, setBoard] = useState([]);
   const [gameStatus, setGameStatus] = useState('playing');
@@ -376,10 +378,14 @@ const Buscaminas = () => {
       </div>
     );
   };
-
-  return (
+  return ( 
     <div className="buscaminas-container-wrapper">
-      <div className="buscaminas-container">
+      {/* Mensaje de bienvenida */}
+      <div className="welcome-message">
+            <h1>¡Bienvenido, {username}!</h1>
+      </div>
+
+        <div className="buscaminas-container">
         {/* Barra superior de menú */}
         <div className="menu-bar">
           <div className="menu-item difficulty-selector">
@@ -415,6 +421,7 @@ const Buscaminas = () => {
           {gameStatus === 'won' && <p className="win-message">¡Ganaste! 🏆 </p>}
           {gameStatus === 'lost' && <p className="lose-message">¡Perdiste! 💥</p>}
         </div>
+
   
         {/* Tablero de juego */}
         <div 
@@ -596,8 +603,17 @@ const Buscaminas = () => {
           padding: 20px;
           background-color: #f4f7f9;
         }
+        .welcome-message {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .welcome-message h1 {
+          font-size: 28px;
+          color: #4a90e2;
+          font-family: 'Arial', sans-serif;
+        }
       `}</style>
     </div>
   );
-};
-export default Buscaminas;
+}
+export default Minesweeper;

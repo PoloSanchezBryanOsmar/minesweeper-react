@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PlayerManager from './PlayerManager';  // Asume que está en el mismo directorio
 import GameEndDialog from './GameEndDialog';
-import Login from './Login';
+import axios from 'axios';
 
 function Minesweeper({ username }) {
 
@@ -43,6 +43,11 @@ const DIFFICULTY_LEVELS = {
 
   // Obtener configuración de dificultad actual
   const getDifficultyConfig = () => DIFFICULTY_LEVELS[difficulty];
+
+  const getPlayerScore = () => {
+    if (!currentPlayer) return 0;
+    return playerScores[currentPlayer.id]?.[difficulty]?.points || 0;
+  };
 
   // Crear el tablero inicial
   const createBoard = () => {
@@ -217,13 +222,38 @@ const DIFFICULTY_LEVELS = {
   const updatePlayerScore = (won) => {
     if (!currentPlayer) return;
   
+    const pointsMap = {
+      facil: 10,
+      medio: 25,
+      dificil: 50
+    };
+  
+    const points = won ? pointsMap[difficulty] : 0;
+  
+    // Llamar a la API para guardar el puntaje
+    axios.post('/api/usuarios/saveScore', {
+      username: username,
+      difficulty: difficulty,
+      won: won,
+      points: points
+    })
+    .then(response => {
+      console.log('Puntaje guardado:', response.data);
+    })
+    .catch(error => {
+      console.error('Error guardando puntaje:', error);
+    });
+    
+  
+    // Actualizar el estado local de puntajes
     setPlayerScores(prev => ({
       ...prev,
       [currentPlayer.id]: {
         ...(prev[currentPlayer.id] || {}),
         [difficulty]: {
           wins: (prev[currentPlayer.id]?.[difficulty]?.wins || 0) + (won ? 1 : 0),
-          losses: (prev[currentPlayer.id]?.[difficulty]?.losses || 0) + (won ? 0 : 1)
+          losses: (prev[currentPlayer.id]?.[difficulty]?.losses || 0) + (won ? 0 : 1),
+          points: (prev[currentPlayer.id]?.[difficulty]?.points || 0) + points
         }
       }
     }));
@@ -317,6 +347,8 @@ const DIFFICULTY_LEVELS = {
     stopTimer();
   };
 
+  
+
   // Inicializar juego
   useEffect(() => {
     resetGame();
@@ -378,29 +410,29 @@ const DIFFICULTY_LEVELS = {
       </div>
     );
   };
-  return ( 
+  return (
     <div className="buscaminas-container-wrapper">
       {/* Mensaje de bienvenida */}
       <div className="welcome-message">
-            <h1>¡Bienvenido, {username}!</h1>
+        <h1>¡Bienvenido, {username}!</h1>
+        <div className="score">
+          <h3>Puntaje: {getPlayerScore()} pts</h3>
+        </div>
       </div>
 
-        <div className="buscaminas-container">
+      <div className="buscaminas-container">
         {/* Barra superior de menú */}
         <div className="menu-bar">
           <div className="menu-item difficulty-selector">
             <label htmlFor="difficulty-select">Dificultad: </label>
-            <select 
+            <select
               id="difficulty-select"
               value={difficulty}
               onChange={handleDifficultyChange}
               className="difficulty-select"
             >
               {Object.keys(DIFFICULTY_LEVELS).map(level => (
-                <option 
-                  key={level} 
-                  value={level}
-                >
+                <option key={level} value={level}>
                   {DIFFICULTY_LEVELS[level].name}
                 </option>
               ))}
@@ -415,54 +447,85 @@ const DIFFICULTY_LEVELS = {
             </div>
           </div>
         </div>
-  
+
         {/* Estado del juego */}
         <div className="game-status">
           {gameStatus === 'won' && <p className="win-message">¡Ganaste! 🏆 </p>}
           {gameStatus === 'lost' && <p className="lose-message">¡Perdiste! 💥</p>}
         </div>
 
-  
         {/* Tablero de juego */}
-        <div 
-          className="board" 
+        <div
+          className="board"
           style={{
-          gridTemplateColumns: `repeat(${getDifficultyConfig().width}, 1fr)`
+            gridTemplateColumns: `repeat(${getDifficultyConfig().width}, 1fr)`,
           }}
-          >
-          {console.log('Difficulty:', difficulty)}
-          {console.log('Current Config:', getDifficultyConfig())}
-          {console.log('Board dimensions:', board.length, board[0]?.length)}
-          {board.map((row, rowIndex) => 
-          row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex))
+        >
+          {board.map((row, rowIndex) =>
+            row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex))
           )}
         </div>
-        
-  
+
         {/* Botón de reinicio */}
-        <button 
-          onClick={() => resetGame()} 
-          className="reset-btn"
-        >
+        <button onClick={() => resetGame()} className="reset-btn">
           Reiniciar Juego
         </button>
-  
-        <style jsx>{`
-          .buscaminas-container {
-            background-color: #f0f4f8;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
-            font-family: 'Arial', sans-serif;
-          }
-  
-           .buscaminas-container {
-          max-width: 800px; /* Increased max-width to accommodate larger boards */
-          width: 100%;
+      </div>
+
+      <PlayerManager
+        players={players}
+        currentPlayer={currentPlayer}
+        onAddPlayer={handleAddPlayer}
+        onRemovePlayer={handleRemovePlayer}
+        onUpdatePlayerName={handleUpdatePlayerName}
+        onSelectPlayer={handleSelectPlayer}
+        playerScores={playerScores}
+      />
+
+      <GameEndDialog
+        isOpen={showGameEndDialog}
+        gameStatus={gameStatus}
+        players={players}
+        currentPlayer={currentPlayer}
+        onSelectNextPlayer={handleSelectNextPlayer}
+        time={time}
+        onReset={handleResetGame}
+      />
+
+      <style jsx>{`
+        .buscaminas-container-wrapper {
+          display: flex;
+          gap: 20px;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 20px;
+          background-color: #f4f7f9;
+        }
+
+        .welcome-message {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .welcome-message h1 {
+          font-size: 28px;
+          color: #4a90e2;
+          font-family: 'Arial', sans-serif;
+        }
+
+        .score {
+          margin-top: 10px;
+          font-size: 18px;
+          color: #4a90e2;
+        }
+
+        .buscaminas-container {
+          background-color: #f0f4f8;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          max-width: 600px;
           margin: 0 auto;
-          overflow: hidden;
+          font-family: 'Arial', sans-serif;
         }
 
         .menu-bar {
@@ -497,7 +560,7 @@ const DIFFICULTY_LEVELS = {
           margin-left: 10px;
         }
 
-       .board {
+        .board {
           display: grid;
           gap: 4px;
           background-color: #e6eaf0;
@@ -518,10 +581,10 @@ const DIFFICULTY_LEVELS = {
           align-items: center;
           cursor: pointer;
           font-weight: bold;
-          font-size: 14px; /* Reduced font size for smaller cells */
+          font-size: 14px;
           transition: all 0.2s ease;
           border: 2px solid #8ca6c0;
-          min-width: 0; /* Allow cells to shrink */
+          min-width: 0;
         }
 
         .cell:hover {
@@ -570,47 +633,6 @@ const DIFFICULTY_LEVELS = {
           color: #e74c3c;
           font-size: 22px;
           font-weight: bold;
-        }
-        `}</style>
-      </div>
-      
-      <PlayerManager 
-        players={players}
-        currentPlayer={currentPlayer}
-        onAddPlayer={handleAddPlayer}
-        onRemovePlayer={handleRemovePlayer}
-        onUpdatePlayerName={handleUpdatePlayerName}
-        onSelectPlayer={handleSelectPlayer}
-        playerScores={playerScores}
-      />
-      
-      <GameEndDialog 
-      isOpen={showGameEndDialog}
-      gameStatus={gameStatus}
-      players={players}
-      currentPlayer={currentPlayer}
-      onSelectNextPlayer={handleSelectNextPlayer}
-      time={time}
-      onReset={handleResetGame}  // Agrega esta línea
-    />
-  
-      <style jsx>{`
-        .buscaminas-container-wrapper {
-          display: flex;
-          gap: 20px;
-          justify-content: center;
-          align-items: flex-start;
-          padding: 20px;
-          background-color: #f4f7f9;
-        }
-        .welcome-message {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .welcome-message h1 {
-          font-size: 28px;
-          color: #4a90e2;
-          font-family: 'Arial', sans-serif;
         }
       `}</style>
     </div>
